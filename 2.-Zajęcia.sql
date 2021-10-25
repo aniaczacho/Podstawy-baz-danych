@@ -39,3 +39,17 @@ select productid, orderid, sum(quantity) as total_quantity
 from orderhist group by productid, orderid
 with cube
 order by productid, orderid
+
+/*ile lat przepracowal w firmie kazy z pracownikow*/
+select employeeid, datediff(year, hiredate, getdate()) from employees
+
+/*najkrotsze imie pracownika*/
+select min(len(firstname)) from employees
+
+select employeeid, count(orderid), min(orderdate) from orders group by employeeid
+
+select customerid, sum(freight) from orders where requireddate - shippeddate < 0 group by customerid
+
+use library
+select top 1 year(out_date), count(fine_assessed) from loanhist group by year(out_date) order by count(fine_assessed) desc
+
