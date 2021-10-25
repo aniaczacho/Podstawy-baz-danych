@@ -21,3 +21,21 @@ from [Order Details] where orderid = 10250
 select max(unitprice) from [order details] group by orderid order by max(unitprice)
 
 select max(unitprice), min(unitprice) from [order details] group by orderid
+
+use northwind
+
+/*cw 1 z 2 grupowanie*/
+select orderid, count(orderid) from [order details] group by orderid
+having count(orderid) > 5
+
+select customerid, count(customerid), sum(Freight) from orders
+where year(shippeddate) = 1998
+group by customerid having count(customerid) > 8
+order by sum(freight) desc
+
+select * from orderhist
+
+select productid, orderid, sum(quantity) as total_quantity
+from orderhist group by productid, orderid
+with cube
+order by productid, orderid
