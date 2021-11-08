@@ -1,98 +1,153 @@
 use northwind
 
 --1.1
-select oo.orderid, companyname, sum(quantity) as sum from [Order Details] oo
-inner join orders o on o.OrderID=oo.OrderID
-inner join customers c on c.CustomerID=o.CustomerID
-group by oo.orderid, companyname
+SELECT Orders.OrderID, SUM(Quantity) AS 'Laczna liczba zamowionych jednostek'
+FROM Orders
+INNER JOIN [Order Details] OD on Orders.OrderID = OD.OrderID
+GROUP BY Orders.OrderID;
 
 --1.2
-select oo.orderid, companyname, sum(quantity) as sum from [Order Details] oo
-inner join orders o on o.OrderID=oo.OrderID
-inner join customers c on c.CustomerID=o.CustomerID
-group by oo.orderid, companyname having sum(quantity)>250
+SELECT Orders.OrderID, SUM(Quantity) AS 'llzj'
+FROM Orders
+INNER JOIN [Order Details] OD on Orders.OrderID = OD.OrderID
+GROUP BY Orders.OrderID
+HAVING SUM(Quantity) > 250;
 
 --1.3
-select oo.orderid, companyname, sum(quantity*unitprice*(1-discount)) as 'value' from [Order Details] oo
-inner join orders o on o.OrderID=oo.OrderID
-inner join customers c on c.CustomerID=o.CustomerID
-group by oo.orderid, companyname
+SELECT Orders.OrderID, SUM(UnitPrice*Quantity*(1-Discount)) AS 'Wartosc',
+C.CompanyName
+FROM Orders
+INNER JOIN [Order Details] [O D] on Orders.OrderID = [O D].OrderID
+INNER JOIN Customers C on Orders.CustomerID = C.CustomerID
+GROUP BY Orders.OrderID, C.CompanyName
+ORDER BY Orders.OrderID;
 
 --1.4
-select oo.orderid, companyname, sum(quantity*unitprice*(1-discount)) as 'value' from [Order Details] oo
-inner join orders o on o.OrderID=oo.OrderID
-inner join customers c on c.CustomerID=o.CustomerID
-group by oo.orderid, companyname having sum(quantity)>250
---1.5
-select oo.orderid, companyname, sum(quantity*unitprice*(1-discount)) as 'value', e.FirstName, e.LastName from [Order Details] oo
-inner join orders o on o.OrderID=oo.OrderID
-inner join customers c on c.CustomerID=o.CustomerID
-inner join Employees e on e.EmployeeID=o.EmployeeID
-group by oo.orderid, companyname, e.FirstName, e.LastName having sum(quantity)>250
+SELECT Orders.OrderID, SUM(UnitPrice*Quantity*(1-Discount)) AS 'Wartosc',
+C.CompanyName
+FROM Orders
+INNER JOIN [Order Details] [O D] on Orders.OrderID = [O D].OrderID
+INNER JOIN Customers C on Orders.CustomerID = C.CustomerID
+GROUP BY Orders.OrderID, C.CompanyName
+HAVING SUM(Quantity) > 250
+ORDER BY Orders.OrderID;
 
+--1.5
+SELECT Orders.OrderID, SUM(UnitPrice*Quantity*(1-Discount)) AS 'Wartosc',
+C.CompanyName, E.FirstName + ' ' + E.LastName AS 'Pracownik'
+FROM Orders
+INNER JOIN [Order Details] [O D] on Orders.OrderID = [O D].OrderID
+INNER JOIN Customers C on Orders.CustomerID = C.CustomerID
+INNER JOIN Employees E ON E.EmployeeID = Orders.EmployeeID
+GROUP BY Orders.OrderID, C.CompanyName, E.FirstName + ' ' + E.LastName
+HAVING SUM(Quantity) > 250
+ORDER BY Orders.OrderID;
 
 --2.1
-select categoryname, sum(quantity) as sum from categories c
-inner join products p on p.CategoryID=c.CategoryID
-inner join [Order Details] oo on oo.ProductID=p.ProductID
-group by c.categoryid, categoryname
+SELECT CategoryName, SUM(Quantity) AS 'llzj'
+FROM Categories
+INNER JOIN Products
+ON Products.CategoryID = Categories.CategoryID
+INNER JOIN [Order Details] AS OD
+ON OD.ProductID = Products.ProductID
+GROUP BY CategoryName;
 
 --2.2
-select categoryname, sum(quantity*oo.UnitPrice*(1-Discount)) as 'Sum of values' from categories c
-inner join products p on p.CategoryID=c.CategoryID
-inner join [Order Details] oo on oo.ProductID=p.ProductID
-group by c.categoryid, categoryname
+SELECT CategoryName, SUM(OD.UnitPrice*Quantity*(1-Discount)) AS 'lwz'
+FROM Categories
+INNER JOIN Products
+ON Products.CategoryID = Categories.CategoryID
+INNER JOIN [Order Details] AS OD
+ON OD.ProductID = Products.ProductID
+GROUP BY CategoryName;
 
 --2.3
-select categoryname, sum(quantity*oo.UnitPrice*(1-Discount)) as 'Sum of values' from categories c
-inner join products p on p.CategoryID=c.CategoryID
-inner join [Order Details] oo on oo.ProductID=p.ProductID
-group by c.categoryid, categoryname order by 2
+SELECT CategoryName, SUM(OD.UnitPrice*Quantity*(1-Discount)) AS 'lwz'
+FROM Categories
+INNER JOIN Products
+ON Products.CategoryID = Categories.CategoryID
+INNER JOIN [Order Details] AS OD
+ON OD.ProductID = Products.ProductID
+GROUP BY CategoryName
+ORDER BY lwz DESC;
 
-select categoryname, sum(quantity*oo.UnitPrice*(1-Discount)) as 'Sum of values' from categories c
-inner join products p on p.CategoryID=c.CategoryID
-inner join [Order Details] oo on oo.ProductID=p.ProductID
-group by c.categoryid, categoryname order by sum(Quantity)
+SELECT CategoryName, SUM(OD.UnitPrice*Quantity*(1-Discount)) AS 'lwz',
+SUM(Quantity) AS 'llzj'
+FROM Categories
+INNER JOIN Products
+ON Products.CategoryID = Categories.CategoryID
+INNER JOIN [Order Details] AS OD
+ON OD.ProductID = Products.ProductID
+GROUP BY CategoryName
+ORDER BY llzj;
+
+--2.4
 
 
 --3.1
-select s.CompanyName, count(o.orderid) as 'orders done in 1997' from shippers as s
-inner join Orders o on o.ShipVia=s.ShipperID and year(o.shippeddate)=1997
-group by s.ShipperID, s.CompanyName
+SELECT CompanyName, COUNT(OrderID) AS 'amount of orders'
+FROM Shippers
+INNER JOIN Orders
+ON Orders.ShipVia = Shippers.ShipperID
+WHERE year(Orders.ShippedDate) = 1997
+GROUP BY CompanyName;
 
 --3.2
-select top 1 s.CompanyName, count(o.orderid) as 'orders done in 1997' from shippers as s
-inner join Orders o on o.ShipVia=s.ShipperID and year(o.shippeddate)=1997
-group by s.ShipperID, s.CompanyName order by 2 desc
+SELECT TOP 1 CompanyName, COUNT(OrderID) AS 'amount of orders'
+FROM Shippers
+INNER JOIN Orders
+ON Orders.ShipVia = Shippers.ShipperID
+WHERE year(Orders.ShippedDate) = 1997
+GROUP BY CompanyName
+ORDER BY [amount of orders] DESC;
 
 --3.3
+SELECT FirstName + '' + LastName, SUM(OD.UnitPrice*Quantity*(1-Discount))
+FROM Employees
+INNER JOIN Orders
+ON Orders.EmployeeID = Employees.EmployeeID
+INNER JOIN [Order Details] AS OD
+ON OD.OrderID = Orders.OrderID
+GROUP BY FirstName + '' + LastName;
+
+--3.4
 select top 1 firstname, lastname from employees e
 inner join orders o on o.EmployeeID=e.EmployeeID and year(o.ShippedDate)=1997
 group by e.EmployeeID, firstname, lastname order by count(o.orderid) desc
 
+--3.5
+SELECT TOP 1 FirstName + '' + LastName,
+SUM(OD.UnitPrice*Quantity*(1-Discount)) AS 'lwz'
+FROM Employees
+INNER JOIN Orders
+ON Orders.EmployeeID = Employees.EmployeeID
+INNER JOIN [Order Details] AS OD
+ON OD.OrderID = Orders.OrderID
+WHERE year(Orders.ShippedDate) = 1997
+GROUP BY FirstName + '' + LastName
+ORDER BY lwz DESC;
 
 --4.1
-select firstname, lastname, sum(quantity*unitprice*(1-discount)) as sum from employees e
-inner join orders o on o.EmployeeID=e.EmployeeID
-inner join [Order Details] oo on oo.OrderID=o.OrderID
-group by e.EmployeeID, firstname, lastname
+SELECT A.FirstName + '' + A.LastName AS 'name',
+SUM(OD.UnitPrice*Quantity*(1-Discount))
+FROM Employees AS A
+INNER JOIN Employees AS B
+ON A.EmployeeID = B.ReportsTo
+INNER JOIN Orders
+ON Orders.EmployeeID = A.EmployeeID
+INNER JOIN [Order Details] AS OD
+ON OD.OrderID = Orders.OrderID
+GROUP BY A.FirstName + '' + A.LastName;
 
---4.2
-select top 1 firstname, lastname, sum(quantity*unitprice*(1-discount)) as sum from employees e
-inner join orders o on o.EmployeeID=e.EmployeeID and year(o.shippeddate)=1997
-inner join [Order Details] oo on oo.OrderID=o.OrderID
-group by e.EmployeeID, firstname, lastname order by 3 desc
-
---4.3
-select e.firstname, e.lastname, sum(quantity*unitprice*(1-discount)) as sum from employees e
-inner join employees ee on ee.reportsto=e.EmployeeID
-inner join orders o on o.EmployeeID=e.EmployeeID
-inner join [Order Details] oo on oo.OrderID=o.OrderID
-group by e.EmployeeID, e.firstname, e.lastname
-
-select e.firstname, e.lastname, sum(quantity*unitprice*(1-discount)) as sum from employees e
-left join employees ee on ee.reportsto=e.EmployeeID
-inner join orders o on o.EmployeeID=e.EmployeeID
-inner join [Order Details] oo on oo.OrderID=o.OrderID
-group by e.EmployeeID, e.firstname, e.lastname having count(ee.employeeid)=0
+SELECT A.FirstName + '' + A.LastName AS 'name',
+SUM(OD.UnitPrice*Quantity*(1-Discount))
+FROM Employees AS A
+LEFT JOIN Employees AS B
+ON A.EmployeeID = B.ReportsTo
+INNER JOIN Orders
+ON Orders.EmployeeID = A.EmployeeID
+INNER JOIN [Order Details] AS OD
+ON OD.OrderID = Orders.OrderID
+WHERE B.ReportsTo IS NULL
+GROUP BY A.FirstName + '' + A.LastName;
 
